@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+
+<script>
+
+    //Cells value
+    const TEMPLATE_WHITE='1';
+    const TEMPLATE_BLACK='0';
+
+
+    //Style className of Cells
+    const CLASSNAME_WHITE = "cell-white";
+    const CLASSNAME_BLACK = "cell-black";
+
+    //interval
+    var interval;
+
+    //Current Grid
+    var grid = [];
+
+    //Ant position
+    var antPositionX;
+    var antPositionY;
+
+    const NORTH = "NORTH";
+    const EAST = "EAST";
+    const SOUTH = "SOUTH";
+    const WEST = "WEST";
+
+    //Index of the current generation
+    var indexGeneration = 0;
+
+    //Directions
+    var directions = [NORTH,EAST,SOUTH,WEST];
+
+    //Directions
+    var directionsIndex = {NORTH:0,EAST:1,SOUTH:2,WEST:3};
+
+
+    //template of the ant
+    var antTemplate = {NORTH:"▲",EAST:"◀",SOUTH:"▼",WEST:"▶"};
+
+    //current direction of the ant
+    var antDirection = SOUTH
+
+
+    /**
+     * Init the grid
+     * @param int size
+     */
+    function initGrid(size){
+
+        stop();
+        antPositionX = (size/2) -1;
+        antPositionY = (size/2) -1;
+
+        var htmlGrid = "<table class='grid'>";
+        grid = [];
+
+        for(x=0; x<size; x++){
+            htmlGrid+="<tr class='row'>";
+            for(y=0; y<size; y++){
+                if (grid[x] == null){
+                    grid[x] = []
+                }
+                grid[x][y] = TEMPLATE_WHITE;
+                if (x==(size/2) && (y==size/2)){
+
+                }
+                htmlGrid += htmlCell(true,x,y);
+            }
+            htmlGrid+="</tr>";
+        }
+
+        document.getElementById("grid").innerHTML = htmlGrid;
+        document.getElementById('panel_grid').style.display = 'none';
+        document.getElementById('panel_grid').style.display = 'block';
+
+        document.getElementById('title_grid').className = "subtitle";
+        document.getElementById('title_grid').innerHTML = "";
+    }
+
+
+    /**
+     * Run the generation
+     */
+    function run(){
+        interval = setInterval(function(){
+            moveAntForward();
+        }, 5);
+
+    }
+
+    /**
+     * Generate the html of a cell
+     * @param Boolean black
+     * @param Boolean ant
+     * @param int x
+     * @param int y
+     * @return string
+     */
+    function htmlCell(white,x,y){
+        var className = CLASSNAME_BLACK
+        var template = "";
+
+        if (x==antPositionX && y==antPositionY){
+            template = antTemplate[antDirection];
+        }
+
+        if (white){
+            className = CLASSNAME_WHITE;
+        }
+
+        return "<td id='cell-"+x+"-"+y+"' class='"+className+"' onClick='clickCell("+x+","+y+")'>"+template+"</td>";
+    }
+
+    /**
+     * Calculate the next direction of the ant
+     * @param Boolean white (is the case white)
+     */
+    function findNextDirection(){
+
+        white = grid[antPositionX][antPositionY] == TEMPLATE_WHITE;
+
+        if (white){
+            if (directionsIndex[antDirection]==3){
+                antDirection = directions[0];
+            }else{
+                antDirection = directions[directionsIndex[antDirection]+1];
+            }
+        }else{
+            if (directionsIndex[antDirection]==0){
+                antDirection = directions[3];
+            }else{
+                antDirection = directions[directionsIndex[antDirection]-1];
+            }
+        }
+    }
+
+    /**
+     * Calculate the next position of the ant
+     */
+    function findNextPosition(){
+        if(antDirection == WEST){
+            antPositionX++;
+        }
+        else if(antDirection == NORTH){
+            antPositionY++;
+        }
+        else if(antDirection == EAST){
+            antPositionX--;
+        }
+        else{
+           antPositionY--;
+        }
+    }
+
+    /**
+     * Change the color of the cell
+     */
+    function changeColor(x,y){
+        if (grid[x][y] == TEMPLATE_BLACK){
+            grid[x][y] = TEMPLATE_WHITE;
+            document.getElementById("cell-"+x+"-"+y).className = CLASSNAME_WHITE;
+        }else{
+            grid[x][y] = TEMPLATE_BLACK;
+            document.getElementById("cell-"+x+"-"+y).className = CLASSNAME_BLACK;
+        }
+    }
+
+    /**
+     * Move the ant
+     */
+    function moveAntForward(){
+
+        var oldAntPositionX = antPositionX;
+        var oldAntPositionY = antPositionY;
+
+        changeColor(antPositionX,antPositionY);
+
+        findNextDirection();
+        findNextPosition();
+
+        document.getElementById("cell-"+oldAntPositionX+"-"+oldAntPositionY).innerHTML = "";
+        document.getElementById("cell-"+antPositionX+"-"+antPositionY).innerHTML = antTemplate[antDirection];
+        document.getElementById('title_grid').className = "subtitle_red";
+        document.getElementById('title_grid').innerHTML = indexGeneration;
+
+
+
+        indexGeneration++;
+    }
+
+
+    /**
+     * Function when click on a cell
+     * @param int x
+     * @param int y
+     */
+    function clickCell(x,y){
+
+        var className = "";
+        if (grid[x][y] == TEMPLATE_BLACK){
+            grid[x][y] = TEMPLATE_WHITE;
+            className = CLASSNAME_WHITE;
+        }else{
+            grid[x][y] = TEMPLATE_BLACK;
+            className = CLASSNAME_BLACK;
+        }
+
+        document.getElementById("cell-"+x+"-"+y).className = className;
+        document.getElementById('grid').style.display = 'none';
+        document.getElementById('grid').style.display = 'block';
+    }
+
+
+    /**
+     * Stop the Interval
+     */
+    function stop(){
+        if (interval != null){
+            clearInterval(interval);
+        }
+        indexGeneration = 0;
+    }
+
+    /**
+     * Main function
+     */
+    function main(){
+        initGrid(78);
+    }
+
+
+
+
+
+</script>
+
+<style>
+
+    *{
+        margin:0px;
+        padding:0px;
+        font-family:"Tahoma";
+        font-size:12px;
+    }
+
+    .cell-black{
+        border:1px solid #A0A0A0;
+        background-color: navy;
+        height:12px;
+        width:12px;
+        cursor:pointer;
+        color:red;
+        text-align: center;
+        font-size:8px;
+    }
+
+    .cell-white{
+        border:1px solid #A0A0A0;
+        background-color:white;
+        height:12px;
+        width:12px;
+        cursor:pointer;
+        color:red;
+        text-align: center;
+        font-size:7px;
+    }
+
+    .grid{
+        margin:20px;
+        border:2px solid #808080;
+        border-collapse:collapse;
+        table-layout: fixed;
+    }
+
+    .row{
+        border:1px solid #A0A0A0;
+    }
+
+    .top_bar{
+        width:500px;
+        margin-left:20px;
+        margin-top:20px;
+    }
+
+    .header{
+        font-size:25px;
+        height:40px;
+        background-color:black;
+        padding:10px;
+        padding-left:20px;
+        color:white;
+
+    }
+
+    .subtitle {
+        font-size:20px;
+        padding-bottom:10px;
+    }
+
+    .subtitle_red{
+        font-size:20px;
+        padding-bottom:10px;
+        color:red;
+    }
+
+
+    .left{
+        float:left;
+    }
+
+
+</style>
+
+<body>
+
+<div class="header">
+    Langton's Ant
+</div>
+
+
+<div class="left">
+        <div class="top_bar">
+            <div class="subtitle">Controls</div>
+            Grid size : <input id="input-size" type="text" name="size" value="78">
+            <input type="button" value="↻" onClick="initGrid(document.getElementById('input-size').value)">
+            <input type="button" value="▶" onClick="run()">
+            <input type="button" value="◼" onClick="stop()">
+        </div>
+
+            <div class="top_bar">
+                <div id="title_grid" class="subtitle"></div>
+            </div>
+
+</div>
+
+        <div class="right">
+
+            <div id="panel_grid">
+                <div id="grid"/>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
+
+<script>
+
+    main();
+</script>

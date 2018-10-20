@@ -1,6 +1,6 @@
 # Langton's Ant
 
-PHP Projet to illustrate the Langton's Ant
+HTML and JS Projet to illustrate the Langton's Ant
 
 You can find more about this project here :  https://en.wikipedia.org/wiki/Langton%27s_ant
 
@@ -22,6 +22,3 @@ Open the file LangtonAnt.html in your favourie web browser.
 
 The size of the grid can be chosen.
 You can click on a cell to change its state.
-
-
-

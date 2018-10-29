@@ -4,13 +4,13 @@
 <script>
 
     //Cells value
-    const TEMPLATE_WHITE='1';
-    const TEMPLATE_BLACK='0';
+    const TEMPLATE_WHITE=false;
+    const TEMPLATE_BLACK=true;
 
 
     //Style className of Cells
-    const CLASSNAME_WHITE = "cell-white";
-    const CLASSNAME_BLACK = "cell-black";
+    const CLASSNAME_WHITE = "white";
+    const CLASSNAME_BLACK = "black";
 
     //interval
     var interval;
@@ -41,32 +41,35 @@
     var antTemplate = {NORTH:"▲",EAST:"▶",SOUTH:"▼",WEST:"◀"};
 
     //current direction of the ant
-    var antDirection = SOUTH
+    var antDirection = NORTH;
 
 
     /**
      * Init the grid
      * @param int size
      */
-    function initGrid(size){
+    /**
+     * Init the grid
+     * @param int size
+     */
+    function initGrid(widthParam,heightParam){
 
         stop();
-        antPositionX = (size/2) -1;
-        antPositionY = (size/2) -1;
+
+        antPositionX = (widthParam/2) -1;
+        antPositionY = (heightParam/2) -1;
+        antDirection = NORTH;
 
         var htmlGrid = "<table class='grid'>";
         grid = [];
 
-        for(x=0; x<size; x++){
+        for(y=0; y<heightParam; y++){
             htmlGrid+="<tr class='row'>";
-            for(y=0; y<size; y++){
+            for(x=0; x<widthParam; x++){
                 if (grid[x] == null){
                     grid[x] = []
                 }
                 grid[x][y] = TEMPLATE_WHITE;
-                if (x==(size/2) && (y==size/2)){
-
-                }
                 htmlGrid += htmlCell(true,x,y);
             }
             htmlGrid+="</tr>";
@@ -87,8 +90,7 @@
     function run(){
         interval = setInterval(function(){
             moveAntForward();
-        }, 5);
-
+        }, 50);
     }
 
     /**
@@ -120,9 +122,7 @@
      */
     function findNextDirection(){
 
-        white = grid[antPositionX][antPositionY] == TEMPLATE_WHITE;
-
-        if (white){
+        if (grid[antPositionX][antPositionY] == TEMPLATE_WHITE){
             if (directionsIndex[antDirection]==3){
                 antDirection = directions[0];
             }else{
@@ -142,16 +142,16 @@
      */
     function findNextPosition(){
         if(antDirection == WEST){
-            antPositionX++;
-        }
-        else if(antDirection == NORTH){
-            antPositionY++;
-        }
-        else if(antDirection == EAST){
             antPositionX--;
         }
+        else if(antDirection == NORTH){
+            antPositionY--;
+        }
+        else if(antDirection == EAST){
+            antPositionX++;
+        }
         else{
-           antPositionY--;
+           antPositionY++;
         }
     }
 
@@ -176,17 +176,15 @@
         var oldAntPositionX = antPositionX;
         var oldAntPositionY = antPositionY;
 
-        changeColor(antPositionX,antPositionY);
-
         findNextDirection();
         findNextPosition();
 
+        changeColor(oldAntPositionX,oldAntPositionY);
+
         document.getElementById("cell-"+oldAntPositionX+"-"+oldAntPositionY).innerHTML = "";
         document.getElementById("cell-"+antPositionX+"-"+antPositionY).innerHTML = antTemplate[antDirection];
-        document.getElementById('title_grid').className = "subtitle_red";
+        document.getElementById('title_grid').className = "red";
         document.getElementById('title_grid').innerHTML = indexGeneration;
-
-
 
         indexGeneration++;
     }
@@ -228,11 +226,8 @@
      * Main function
      */
     function main(){
-        initGrid(78);
+        initGrid(80,50);
     }
-
-
-
 
 
 </script>
@@ -240,47 +235,13 @@
 <style>
 
     *{
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         margin:0px;
         padding:0px;
-        font-family:"Tahoma";
         font-size:12px;
     }
 
-    .cell-black{
-        border:1px solid #A0A0A0;
-        background-color: navy;
-        height:12px;
-        width:12px;
-        cursor:pointer;
-        color:red;
-        text-align: center;
-        font-size:8px;
-    }
-
-    .cell-white{
-        border:1px solid #A0A0A0;
-        background-color:white;
-        height:12px;
-        width:12px;
-        cursor:pointer;
-        color:red;
-        text-align: center;
-        font-size:7px;
-    }
-
-    .grid{
-        margin:20px;
-        border:2px solid #808080;
-        border-collapse:collapse;
-        table-layout: fixed;
-    }
-
-    .row{
-        border:1px solid #A0A0A0;
-    }
-
     .top_bar{
-        width:500px;
         margin-left:20px;
         margin-top:20px;
     }
@@ -288,11 +249,44 @@
     .header{
         font-size:25px;
         height:40px;
-        background-color:black;
+        background-color:#24292e;
         padding:10px;
         padding-left:20px;
         color:white;
+        margin-bottom:50px;
 
+    }
+
+    .black{
+        background-color:mediumblue;
+    }
+
+    td{
+        height:10px;
+        width:10px;
+        border:1px solid #A0A0A0;
+        cursor:pointer;
+        font-size:7px;
+        padding:0px;
+        text-align:center;
+        color:red;
+    }
+
+    table{
+        border-collapse:collapse;
+        table-layout: fixed;
+        border: 2px solid #808080;
+        box-shadow: inset 0 1px 3px #ddd;
+    }
+
+    tr{
+        border:1px solid #A0A0A0;
+    }
+
+    .left{
+        float:left;
+        margin-right:20px;
+        margin-left:20px;
     }
 
     .subtitle {
@@ -300,50 +294,73 @@
         padding-bottom:10px;
     }
 
-    .subtitle_red{
+    .red{
         font-size:20px;
-        padding-bottom:10px;
-        color:red;
+        color:crimson;
+        margin-top:20px;
+    }
+
+    .red.invisible{
+        display:none;
+    }
+
+    .label{
+        width:200px;
+        display:block;
+        margin-bottom:10px;
+    }
+
+    input {
+        border: 1px solid #ccc;
+        box-shadow: inset 0 1px 3px #ddd;
+        border-radius: 4px;
+        padding-left: 20px;
+        padding-right: 20px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        margin-right:2px;
+
+    }
+
+    .button{
+        background-color:lightgray;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
 
 
-    .left{
-        float:left;
-    }
 
 
-</style>
-
-<body>
+</style><body>
 
 <div class="header">
     Langton's Ant
 </div>
 
-
 <div class="left">
-        <div class="top_bar">
-            <div class="subtitle">Controls</div>
-            Grid size : <input id="input-size" type="text" name="size" value="78">
-            <input type="button" value="↻" onClick="initGrid(document.getElementById('input-size').value)">
-            <input type="button" value="▶" onClick="run()">
-            <input type="button" value="◼" onClick="stop()">
-        </div>
+    <div class="top_bar">
+        <div class="subtitle">Controls</div>
+        <div class="label">Grid width : <input id="width" value="80"/><br/></div>
+        <div class="label">Grid height :<input id="height" value="50"/><br/></div>
+        <input type="button" class="button" value="↻" onClick="initGrid(document.getElementById('width').value,document.getElementById('height').value)">
+        <input type="button" class="button" value="▶" onClick="run()">
+        <input type="button" class="button" value="◼" onClick="stop()">
+    </div>
 
-            <div class="top_bar">
-                <div id="title_grid" class="subtitle"></div>
-            </div>
+    <div class="top_bar">
+        <div id="title_grid" class="red"></div>
+    </div>
 
 </div>
 
-        <div class="right">
+<div class="right">
 
-            <div id="panel_grid">
-                <div id="grid"/>
-            </div>
-        </div>
-
+    <div id="panel_grid">
+        <div id="grid"/>
     </div>
+</div>
+
+</div>
+
 
 </body>
 </html>
